@@ -195,10 +195,31 @@ console.log(new User({name: 'Brian'}));
 console.log(Users.create([{name: 'Brian'}]));
 console.log(Users.read({where: {user_id: 1}}));
 
-const is = R.curry((key,val) => ({[key]: {is: val}}));
-const isNot = R.curry((key,val) => ({[key]: {isNot: val}}));
-const isIn = R.curry((key,val) => ({[key]: {isIn: val}}));
-const isNotIn = R.curry((key,val) => ({[key]: {isNotIn: val}}));
+const logicStatement = R.curry(function(operation, property, argument){
+  return {
+    property,
+    operation,
+    argument
+  }
+});
+const is = logicStatement('is');
+const isNot = logicStatement('isNot');
+const isIn = logicStatement('isIn');
+const isNotIn = logicStatement('isNotIn');
+const isLessThan = logicStatement('isLessThan');
+const isMoreThan = logicStatement('isMoreThan');
+const contains = logicStatement('contains');
+
+const collector = function(operation) {
+  return function(...args) {
+    return {
+      operation,
+      argument: args
+    }
+  }
+}
+const or = collector('or');
+const and = collector('and');
 
 const whereTypeCases = {
   TEXT({key}) {
@@ -207,6 +228,7 @@ const whereTypeCases = {
       isNot: isNot(key),
       isIn: isIn(key),
       isNotIn: isNotIn(key),
+      contains: contains(key),
     }
   },
   INTEGER({key}) {
@@ -215,6 +237,8 @@ const whereTypeCases = {
       isNot: isNot(key),
       isIn: isIn(key),
       isNotIn: isNotIn(key),
+      isLessThan: isLessThan(key),
+      isMoreThan: isMoreThan(key),
     }
   },
   default({type}) {
@@ -222,12 +246,8 @@ const whereTypeCases = {
   }
 }
 
-const or = (...args) => ({or: args});
-const and = (...args) => ({and: args});
-
 const where = R.curry(function(properties, cb) {
   const propertyContext = properties.reduce((accumulator, {key, type, column}) => {
-    console.log(type, whereTypeCases[type])
     accumulator[key] = (whereTypeCases[type] || whereTypeCases.default)({key, type, column});
     return accumulator;
   },{});
@@ -240,9 +260,16 @@ const where = R.curry(function(properties, cb) {
   console.log(JSON.stringify(whereDescriptor, null, '  '))
 });
 
-where(userProperties)(({or}, {userId, username})=>{
-  return and(userId.isIn([123,234,345]), username.is('Brian'));
-})
+where(userProperties)(({and, or}, {userId, username, name}) => and(
+  and(
+    userId.isIn([2,3,4]),
+    userId.isIn([1,2,3]),
+  ),
+  or(
+    username.contains('Mike'),
+    username.contains('Brian'),
+  ),
+));
 
 // const and = val => ({and: val});
 // const where = cb => cb({is, isNot, isIn, isNotIn, and});
