@@ -52,7 +52,7 @@ const whereTypeCases = {
   }
 }
 
-const where = function(properties, cb) {
+const where = function(properties) {
   const propertyContext = properties.reduce((accumulator, {key, type, column}) => {
     accumulator[key] = (whereTypeCases[type] || whereTypeCases.default)({key, type, column});
     return accumulator;
@@ -63,9 +63,10 @@ const where = function(properties, cb) {
   }
 
   return function(query) {
-    return function(cb) {
-      query.where = cb(propertyContext, operators);
-      return query;  
+    return function(callback) {
+      return Object.assign({}, query, {
+        where: callback(propertyContext, operators)
+      });
     }  
   }
 };

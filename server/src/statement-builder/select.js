@@ -1,7 +1,7 @@
 import R from 'ramda';
 import where from './where';
 
-const select = function(properties, cb) {
+const select = function(properties) {
 
   const propertyContext = properties.reduce((accumulator, {key, type, column}) => {
     accumulator[key] = key;
@@ -23,8 +23,8 @@ const select = function(properties, cb) {
   })
   propertyContext.all = keys;
 
-  return function(cb) {
-    return { select: cb(propertyContext) };
+  return function(callback) {
+    return { select: callback(propertyContext) };
   }
 };
 

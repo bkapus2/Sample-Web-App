@@ -7,8 +7,8 @@ export default function(properties) {
   const where = Where(properties);
 
   const context = {
-    select(cb) {
-      const query = select(cb);
+    select(callback) {
+      const query = select(callback);
       return {
         where: where(query)
       }
