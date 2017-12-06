@@ -1,5 +1,5 @@
 import R from 'ramda';
-import statementBuilder from './statement-builder';
+import statementBuilder from './../statement-builder';
 
 const isUndefined = val => val === undefined;
 const isNull = val => val === null;

@@ -1,7 +1,9 @@
-import User from './user';
-import users from './users';
+import dbio from './dbio';
+import userModel from './models/user'
 
-console.log(new User({name: 'Brian'}));
+dbio.models.add(userModel);
+
+const { users } = dbio;
 console.log(users.create([{name: 'Brian'}]));
 console.log(users.read({where: {user_id: 1}}));
 
