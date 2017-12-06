@@ -52,7 +52,7 @@ const whereTypeCases = {
   }
 }
 
-const where = R.curry(function(properties, cb) {
+const where = function(properties, cb) {
   const propertyContext = properties.reduce((accumulator, {key, type, column}) => {
     accumulator[key] = (whereTypeCases[type] || whereTypeCases.default)({key, type, column});
     return accumulator;
@@ -62,8 +62,12 @@ const where = R.curry(function(properties, cb) {
     and, or, not
   }
 
-  const whereDescriptor = cb(operators, propertyContext);
-  console.log(JSON.stringify(whereDescriptor, null, '  '))
-});
+  return function(query) {
+    return function(cb) {
+      query.where = cb(propertyContext, operators);
+      return query;  
+    }  
+  }
+};
 
 export default where;

@@ -80,9 +80,9 @@ class Collection {
 
     });
   }
-
-  get where() {
-    return statementBuilder.where(this.properties);
+  
+  get select() {
+    return statementBuilder(this.properties).select;
   }
 
   get instanciate() {

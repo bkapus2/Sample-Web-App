@@ -32,10 +32,14 @@ models.add = function(model) {
     }
   }
 
-  Object.assign(dbio, {
+  const newProperties = {
     [collectionName]: collectionInstane,
     [entityClass]: entityClass,
-  })
+  }
+
+  Object.assign(dbio, newProperties);
+
+  return newProperties;
 }
 
 const dbio = {
