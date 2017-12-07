@@ -27,7 +27,7 @@ const or = operator('or');
 const and = operator('and');
 const not = operator('not');
 
-const whereTypeCases = {
+const keyValueMap = {
   TEXT({key}) {
     return {
       is: is(key),
@@ -52,9 +52,9 @@ const whereTypeCases = {
   }
 }
 
-const where = function(properties) {
+export default function(properties) {
   const propertyContext = properties.reduce((accumulator, {key, type, column}) => {
-    accumulator[key] = (whereTypeCases[type] || whereTypeCases.default)({key, type, column});
+    accumulator[key] = (keyValueMap[type] || keyValueMap.default)({key, type, column});
     return accumulator;
   },{});
 
@@ -70,5 +70,3 @@ const where = function(properties) {
     }  
   }
 };
-
-export default where;

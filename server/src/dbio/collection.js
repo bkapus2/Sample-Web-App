@@ -53,36 +53,50 @@ const parseWhereObject = function(where) {
 }
 
 class Collection {
-  create(instances) {
-    return new Promise((resolve, reject) => {
-      validateIsArrayOfObjects(instances);
-      const entities = instances.map(this.instanciate);
-      const createStatement = this.createStatement(entities);
-      resolve(createStatement);
+  // create(instances) {
+  //   return new Promise((resolve, reject) => {
+  //     validateIsArrayOfObjects(instances);
+  //     const entities = instances.map(this.instanciate);
+  //     const createStatement = this.createStatement(entities);
+  //     resolve(createStatement);
+  //   });
+  // }
+
+  // read({where}={}) {
+  //   return new Promise((resolve, reject) => {
+  //     const whereSubStatement = where ? this.whereSubStatement(where) : null;
+  //     resolve({whereSubStatement})
+  //   });
+  // }
+
+  // update() {
+  //   return new Promise((resolve, reject) => {
+
+  //   });
+  // }
+
+  // delete() {
+  //   return new Promise((resolve, reject) => {
+
+  //   });
+  // }
+
+  get statements() {
+    const statements = statementBuilder(this.properties);
+    Object.defineProperty(this.__proto__, 'statements', {
+      get() {
+        return statements;
+      }
     });
-  }
-
-  read({where}={}) {
-    return new Promise((resolve, reject) => {
-      const whereSubStatement = where ? this.whereSubStatement(where) : null;
-      resolve({whereSubStatement})
-    });
-  }
-
-  update() {
-    return new Promise((resolve, reject) => {
-
-    });
-  }
-
-  delete() {
-    return new Promise((resolve, reject) => {
-
-    });
+    return statements;
   }
   
   get select() {
-    return statementBuilder(this.properties).select;
+    return this.statements.select;
+  }
+
+  get update() {
+    return this.statements.update;
   }
 
   get instanciate() {
