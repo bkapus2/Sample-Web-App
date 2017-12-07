@@ -30,6 +30,7 @@ const keyValueMap = {
 export default function(properties) {
   const propertyContext = properties.reduce((accumulator, {key, column, type}) => {
     accumulator[key] = (keyValueMap[type] || keyValueMap.default)({key, column, type});
+    return accumulator;
   }, {});
 
   return function(callback) {

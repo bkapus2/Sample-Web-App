@@ -2,6 +2,7 @@
 import Select from './select';
 import Update from './update';
 // import Delete from './delete';
+
 import Where from './where';
 
 export default function(properties) {
@@ -10,6 +11,7 @@ export default function(properties) {
   const select = Select(properties);
   const update = Update(properties);
   // const remove = Delete(properties);
+  
   const where = Where(properties);
 
   const context = {
@@ -36,5 +38,6 @@ export default function(properties) {
       }
     },
   }
+
   return context;
 }
