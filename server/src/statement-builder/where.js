@@ -1,4 +1,5 @@
 import R from 'ramda';
+import assignFollowUpStatements from './assignFollowUpStatements'
 
 const logicStatement = R.curry(function(operation, property, argument){
   return {
@@ -62,11 +63,14 @@ export default function(properties) {
     and, or, not
   }
 
-  return function(query) {
+  return function where({ query, followUpStatements }) {
+    const indexOfStatement = followUpStatements.findIndex( statement => statement.name === 'where');
+    followUpStatements = followUpStatements.slice(indexOfStatement+1);
     return function(callback) {
-      return Object.assign({}, query, {
+      const _query = Object.assign({}, query, {
         where: callback(propertyContext, operators)
       });
+      return assignFollowUpStatements(_query, followUpStatements);
     }  
   }
 };

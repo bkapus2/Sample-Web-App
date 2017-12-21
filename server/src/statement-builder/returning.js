@@ -23,16 +23,18 @@ export default function(properties) {
   })
   propertyContext.all = keys;
 
-  return function select({ followUpStatements }) {
+  return function returning({ query, followUpStatements }) {
+    const indexOfStatement = followUpStatements.findIndex( statement => statement.name === 'returning');
+    followUpStatements = followUpStatements.slice(indexOfStatement+1);
     return function(callback) {
       let value = callback(propertyContext);
       if (Array.isArray(value)) {
         value = [value];
       }
-      const query = {
-        select: value
-      };
-      return assignFollowUpStatements(query, followUpStatements);
-    }
+      const _query = Object.assign({}, query, {
+        returning: value
+      });
+      return assignFollowUpStatements(_query, followUpStatements);
+    }  
   }
 };

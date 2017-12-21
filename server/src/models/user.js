@@ -18,6 +18,11 @@ export default {
       key: 'username',
       type: 'TEXT',
     },
+    {
+      column: 'times_logged_in',
+      key: 'timesLoggedIn',
+      type: 'INTEGER',
+    },
   ],
   relations: {
     oneToOne: [],

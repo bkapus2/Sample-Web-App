@@ -4,6 +4,7 @@ import Update from './update';
 // import Delete from './delete';
 
 import Where from './where';
+import Returning from './returning';
 
 export default function(properties) {
 
@@ -13,29 +14,28 @@ export default function(properties) {
   // const remove = Delete(properties);
   
   const where = Where(properties);
+  const returning = Returning(properties);
 
   const context = {
     insert(callback) {
-      const query = insert({})(callback);
-      return {}
+      const followUpStatements = [returning];
+      const query = insert({followUpStatements})(callback);
+      return query;
     },
     select(callback) {
-      const query = select({})(callback);
-      return {
-        where: where(query)
-      }
+      const followUpStatements = [where];
+      const query = select({followUpStatements})(callback);
+      return query;
     },
     update(callback) {
-      const query = update({})(callback);
-      return {
-        where: where(query)
-      }
+      const followUpStatements = [where, returning];
+      const query = update({followUpStatements})(callback);
+      return query;
     },
     delete(callback) {
-      const query = remove({})(callback);
-      return {
-        where: where(query)
-      }
+      const followUpStatements = [where, returning];
+      const query = remove({followUpStatements})(callback);
+      return query;
     },
   }
 
