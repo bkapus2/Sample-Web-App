@@ -28,7 +28,7 @@ models.add = function(model) {
 
   const entityClass = class extends Mixin(Entity) {
     get collection() {
-      return dbio;
+      return collectionInstane;
     }
   }
 

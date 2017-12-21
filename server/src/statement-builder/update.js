@@ -33,7 +33,11 @@ export default function(properties) {
     return accumulator;
   }, {});
 
-  return function(callback) {
-    return { update: callback(propertyContext) }
+  return function(query) {
+    return function(callback) {
+      return Object.assign({}, query, {
+        update: callback(propertyContext)
+      });
+    }
   }
 }

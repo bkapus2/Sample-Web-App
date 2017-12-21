@@ -16,23 +16,23 @@ export default function(properties) {
 
   const context = {
     insert(callback) {
-      const query = insert(callback);
+      const query = insert({})(callback);
       return {}
     },
     select(callback) {
-      const query = select(callback);
+      const query = select({})(callback);
       return {
         where: where(query)
       }
     },
     update(callback) {
-      const query = update(callback);
+      const query = update({})(callback);
       return {
         where: where(query)
       }
     },
     delete(callback) {
-      const query = remove(callback);
+      const query = remove({})(callback);
       return {
         where: where(query)
       }

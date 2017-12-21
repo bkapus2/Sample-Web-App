@@ -23,7 +23,11 @@ export default function(properties) {
   })
   propertyContext.all = keys;
 
-  return function(callback) {
-    return { select: callback(propertyContext) };
+  return function(query) {
+    return function(callback) {
+      return Object.assign({}, query, {
+        select: callback(propertyContext)
+      });
+    }
   }
 };
