@@ -1,5 +1,5 @@
-import R from 'ramda';
-import assignFollowUpStatements from './assignFollowUpStatements';
+import assignstatementChain from './assignStatementChain';
+import pluck from './../util/pluck'
 
 export default function(properties) {
 
@@ -9,7 +9,7 @@ export default function(properties) {
   },{});
 
   // give access to an all object, which can remove certain keys
-  const keys = R.pluck('key', properties);
+  const keys = properties.map(pluck('key'));
   const removeFromKeys = function(item) {
     const index = keys.indexOf(item);
     if (index > -1)
@@ -23,18 +23,37 @@ export default function(properties) {
   })
   propertyContext.all = keys;
 
-  return function returning({ query, followUpStatements }) {
-    const indexOfStatement = followUpStatements.findIndex( statement => statement.name === 'returning');
-    followUpStatements = followUpStatements.slice(indexOfStatement+1);
+  return function returning({ query, statementChain }) {
+    const indexOfStatement = statementChain.findIndex( statement => statement.name === 'returning');
+    statementChain = statementChain.slice(indexOfStatement+1);
     return function(callback) {
-      let value = callback(propertyContext);
-      if (Array.isArray(value)) {
-        value = [value];
+      let value;
+
+      // if we have a callback
+      if (callback) {
+        value = callback(propertyContext);
+
+        // check that the callback returned a value
+        if (!value) {
+          throw new TypeError('returning statement callback did not provide a return value.')
+        }
+        
+        // wrap single values in an array
+        if (!Array.isArray(value)) {
+          value = [value];
+        }
       }
+
+      // if we do not have a callback assume we are selecting all keys
+      else {
+        value = keys;
+      }
+
       const _query = Object.assign({}, query, {
-        returning: value
+        returning: value.length === properties.length ? "all" : value
       });
-      return assignFollowUpStatements(_query, followUpStatements);
+
+      return assignstatementChain(_query, statementChain);
     }  
   }
 };

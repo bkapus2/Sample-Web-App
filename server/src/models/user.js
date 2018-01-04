@@ -19,6 +19,11 @@ export default {
       type: 'TEXT',
     },
     {
+      column: 'password',
+      key: 'password',
+      type: 'TEXT',
+    },
+    {
       column: 'times_logged_in',
       key: 'timesLoggedIn',
       type: 'INTEGER',

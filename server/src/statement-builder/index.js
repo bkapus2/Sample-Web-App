@@ -6,7 +6,9 @@ import Update from './update';
 import Where from './where';
 import Returning from './returning';
 
-export default function(properties) {
+import Submit from './submit';
+
+export default function({properties, submitHandler, collectionName}) {
 
   // const insert = Insert(properties);
   const select = Select(properties);
@@ -16,25 +18,27 @@ export default function(properties) {
   const where = Where(properties);
   const returning = Returning(properties);
 
+  const submit = Submit(submitHandler);
+
   const context = {
     insert(callback) {
-      const followUpStatements = [returning];
-      const query = insert({followUpStatements})(callback);
+      const statementChain = [returning, submit];
+      const query = insert({query: {collectionName: collectionName}, statementChain})(callback);
       return query;
     },
     select(callback) {
-      const followUpStatements = [where];
-      const query = select({followUpStatements})(callback);
+      const statementChain = [where, submit];
+      const query = select({query: {collectionName: collectionName}, statementChain})(callback);
       return query;
     },
     update(callback) {
-      const followUpStatements = [where, returning];
-      const query = update({followUpStatements})(callback);
+      const statementChain = [where, returning, submit];
+      const query = update({query: {collectionName: collectionName}, statementChain})(callback);
       return query;
     },
     delete(callback) {
-      const followUpStatements = [where, returning];
-      const query = remove({followUpStatements})(callback);
+      const statementChain = [where, returning, submit];
+      const query = remove({query: {collectionName: collectionName}, statementChain})(callback);
       return query;
     },
   }

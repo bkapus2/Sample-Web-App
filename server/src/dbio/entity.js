@@ -1,12 +1,12 @@
-import R from 'ramda';
-
-const reduceInstance = R.curry(function(keys, instance) {
-  return keys.reduce(function(accumulator, key) {
-    // should do any type infrencing / conversion here
-    accumulator[key] = instance[key];
-    return accumulator;
-  }, {});
-});
+const reduceInstance = function(keys) {
+  return function(instance) {
+    return keys.reduce(function(accumulator, key) {
+      // should do any type infrencing / conversion here
+      accumulator[key] = instance[key];
+      return accumulator;
+    }, {});
+  }
+};
 
 class Entity {
 

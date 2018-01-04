@@ -1,5 +1,5 @@
-import R from 'ramda';
-import assignFollowUpStatements from './assignFollowUpStatements';
+import assignstatementChain from './assignStatementChain';
+import pluck from './../util/pluck'
 
 export default function(properties) {
 
@@ -8,31 +8,51 @@ export default function(properties) {
     return accumulator;
   },{});
 
-  // give access to an all object, which can remove certain keys
-  const keys = R.pluck('key', properties);
-  const removeFromKeys = function(item) {
-    const index = keys.indexOf(item);
-    if (index > -1)
-      keys.splice(index, 1);
-  }
-  Object.defineProperty(keys, 'except', {
-    value(...args) {
-      args.forEach(removeFromKeys);
-      return keys;
+  return function select({query, statementChain }) {
+    
+    // give access to an all object, which can remove certain keys
+    const keys = properties.map(pluck('key'));
+    const removeFromKeys = function(item) {
+      const index = keys.indexOf(item);
+      if (index > -1)
+        keys.splice(index, 1);
     }
-  })
-  propertyContext.all = keys;
-
-  return function select({ followUpStatements }) {
-    return function(callback) {
-      let value = callback(propertyContext);
-      if (Array.isArray(value)) {
-        value = [value];
+    Object.defineProperty(keys, 'except', {
+      value(...args) {
+        args.forEach(removeFromKeys);
+        return keys;
       }
-      const query = {
-        select: value
-      };
-      return assignFollowUpStatements(query, followUpStatements);
+    })
+    propertyContext.all = keys;
+
+    return function(callback) {
+      let value;
+
+      // if we have a callback
+      if (callback) {
+        value = callback(propertyContext);
+
+        // check that the callback returned a value
+        if (!value) {
+          throw new TypeError('select statement callback did not provide a return value.')
+        }
+        
+        // wrap single values in an array
+        if (!Array.isArray(value)) {
+          value = [value];
+        }
+      }
+
+      // if we do not have a callback assume we are selecting all keys
+      else {
+        value = keys;
+      }
+
+      const _query = Object.assign({}, query, {
+        select: value.length === properties.length ? "all" : value
+      });
+
+      return assignstatementChain(_query, statementChain);
     }
   }
 };

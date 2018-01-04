@@ -1,28 +1,32 @@
 import dbio from './dbio';
 import userModel from './models/user'
+import emailModel from './models/email'
 
-const { User, users } = dbio.models.add(userModel);
+const { user, users } = dbio.models.add(userModel);
+const { email, emails } = dbio.models.add(emailModel);
 // can now also access User and users though dbio.User and dbio.users
 
 const logJson = arg => console.log(JSON.stringify(arg, null, '  '))
 
-logJson(
-  users
-    .select(({ all, userId }) => all.except(userId))
-    .where(({ username }) => username.contains('Brian'))
-);
+users
+  .select(({ all, password }) => all.except(password))
+  .where(({ userId, username }) => userId.isIn(
+    emails
+      .select(({ userId }) => userId)
+      .where(({ email }) => email.matches(/@gmail\.com$/i))
+  ))
+  .submit()
+  .then(console.log);
 
-logJson(
-  users
-    .update(({ timesLoggedIn }) => timesLoggedIn.increment())
-    .where(({ userId }) => userId.is(1))
-    .returning(({ timesLoggedIn }) => timesLoggedIn)
-);
+users
+  .update(({ timesLoggedIn }) => timesLoggedIn.increment())
+  .where(({ userId }) => userId.is(1))
+  .returning(({ timesLoggedIn }) => timesLoggedIn)
+  .submit()
+  .then(console.log);
 
-const queryBase = users
-  .update(({ name }) => name.set('Brian K.'))
-  .where(({ userId }) => userId.is(1));
-
-logJson(queryBase.returning(({ name }) => name))
-logJson(queryBase.returning(({ all }) => all))
-
+users
+  .select()
+  .where(({userId})=>userId.is(1))
+  .submit()
+  .then(console.log);

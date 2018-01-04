@@ -1,13 +1,16 @@
-import R from 'ramda';
-import assignFollowUpStatements from './assignFollowUpStatements'
+import assignstatementChain from './assignStatementChain'
 
-const logicStatement = R.curry(function(operation, property, argument){
-  return {
-    property,
-    operation,
-    argument
+const logicStatement = function(operation){
+  return function(property) {
+    return function(argument) {
+      return {
+        property,
+        operation,
+        argument
+      }
+    }
   }
-});
+};
 const is = logicStatement('is');
 const isNot = logicStatement('isNot');
 const isIn = logicStatement('isIn');
@@ -15,6 +18,9 @@ const isNotIn = logicStatement('isNotIn');
 const isLessThan = logicStatement('isLessThan');
 const isMoreThan = logicStatement('isMoreThan');
 const contains = logicStatement('contains');
+const matches = logicStatement('matches');
+const startsWith = logicStatement('startsWith');
+const endsWith = logicStatement('endsWith');
 
 const operator = function(operation) {
   return function(...args) {
@@ -36,6 +42,9 @@ const keyValueMap = {
       isIn: isIn(key),
       isNotIn: isNotIn(key),
       contains: contains(key),
+      startsWith: startsWith(key),
+      endsWith: endsWith(key),
+      matches: matches(key),
     }
   },
   INTEGER({key}) {
@@ -46,6 +55,12 @@ const keyValueMap = {
       isNotIn: isNotIn(key),
       isLessThan: isLessThan(key),
       isMoreThan: isMoreThan(key),
+    }
+  },
+  BOOLEAN({key}) {
+    return {
+      is: is(key),
+      isNot: isNot(key),
     }
   },
   default({type}) {
@@ -63,14 +78,22 @@ export default function(properties) {
     and, or, not
   }
 
-  return function where({ query, followUpStatements }) {
-    const indexOfStatement = followUpStatements.findIndex( statement => statement.name === 'where');
-    followUpStatements = followUpStatements.slice(indexOfStatement+1);
+  return function where({ query, statementChain }) {
+    const indexOfStatement = statementChain.findIndex( statement => statement.name === 'where');
+    statementChain = statementChain.slice(indexOfStatement+1);
     return function(callback) {
+      const value = callback(propertyContext, operators);
+
+      // check that the callback returned a value
+      if (typeof value !== 'object') {
+        throw new TypeError('where statement callback did not provide a return value.')
+      }
+
       const _query = Object.assign({}, query, {
-        where: callback(propertyContext, operators)
+        where: value
       });
-      return assignFollowUpStatements(_query, followUpStatements);
+      
+      return assignstatementChain(_query, statementChain);
     }  
   }
 };

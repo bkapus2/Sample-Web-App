@@ -1,5 +1,4 @@
 import R from 'ramda';
-import statementBuilder from './../statement-builder';
 
 const isUndefined = val => val === undefined;
 const isNull = val => val === null;
@@ -81,38 +80,8 @@ class Collection {
   //   });
   // }
 
-  get statements() {
-    const statements = statementBuilder(this.properties);
-    Object.defineProperty(this.__proto__, 'statements', {
-      get() {
-        return statements;
-      }
-    });
-    return statements;
-  }
-  
-  get select() {
-    return this.statements.select;
-  }
-
-  get update() {
-    return this.statements.update;
-  }
-
   get instanciate() {
     return instance => new this.entity(instance)
-  }
-
-  createStatement(entities) {
-    const rows = entities.map(reduceToRow(this.properties, {replaceUndefined: 'DEFAULT'}));
-    const keys = Object.keys(rows[0]).join(',');
-    const values = rows.map(row=>'('+Object.values(row).join(',')+')').join(',');
-    const returning = this.properties.map(property=>property.column).join(',');
-    return `INSERT INTO ${this.tableName} (${keys}) VALUES ${values} RETURNING ${returning};`
-  }
-
-  whereSubStatement(where) {
-    return parseWhereObject(where);
   }
 }
 

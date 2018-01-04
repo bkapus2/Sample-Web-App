@@ -1,9 +1,9 @@
-export default function(_query, followUpStatements) {
+export default function(_query, statementChain) {
   const query = Object.assign({}, _query);
-  followUpStatements.forEach((statement) => {
+  statementChain.forEach((statement) => {
     Object.defineProperty(query, statement.name, {
       get() {
-        return statement({ query, followUpStatements });
+        return statement({ query, statementChain });
       },
       enumerable: false
     })
